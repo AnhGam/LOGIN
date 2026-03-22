@@ -25,7 +25,7 @@ export default function Home({ user, onNavigateToProfile }) {
       </View>
 
       <View style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontSize: 20, fontWeight: '600' }}>Bài đăng của bạn (10)</Text>
+        <Text style={{ fontSize: 20, fontWeight: '600' }}>Bài đăng của bạn (5)</Text>
         <TouchableOpacity style={{ borderWidth: 1, padding: 5, paddingHorizontal: 15 }}>
           <Text>+ Thêm</Text>
         </TouchableOpacity>
