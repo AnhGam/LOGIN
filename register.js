@@ -1,68 +1,83 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function Register() {
+export default function Register({ onNavigateToLogin }) {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirm, setConfirm] = useState('');
+
+  const registerUser = async () => {
+    // Kiểm tra thông tin cơ bản
+    if (!name || !email || !password) {
+      return Alert.alert("Lỗi", "Vui lòng điền đủ thông tin");
+    }
+    if (password !== confirm) {
+      return Alert.alert("Lỗi", "Mật khẩu không khớp");
+    }
+    
+    try {
+      // Tạo object user đơn giản
+      const newUser = { name, email, password };
+      // Lưu vào bộ nhớ máy
+      await AsyncStorage.setItem(email, JSON.stringify(newUser));
+      
+      Alert.alert("Xong!", "Đăng ký thành công", [
+        { text: "OK", onPress: onNavigateToLogin }
+      ]);
+    } catch (e) {
+      Alert.alert("Lỗi", "Không thể lưu dữ liệu: " + e.message);
+    }
+  };
+
   return (
-    <View style={{
-      flexDirection: 'column',
-      justifyContent: 'space-around',
-      width: 250,
-      height: 500,
-      padding: 20,
-      borderWidth: 1
-    }}>
+    <View style={{ flex: 1, backgroundColor: '#f0f0f0', justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ width: 300, padding: 20, backgroundColor: 'white', borderWidth: 1, borderColor: '#ccc' }}>
+        <Text style={{ fontSize: 30, fontWeight: 'bold', textAlign: 'center', marginBottom: 20 }}>Đăng Ký</Text>
+        
+        <Text style={{ marginBottom: 5 }}>Họ và tên:</Text>
+        <TextInput 
+          style={{ borderWidth: 1, height: 40, paddingHorizontal: 10, marginBottom: 15 }} 
+          placeholder="Ví dụ: Nguyễn Văn A" 
+          onChangeText={setName} 
+        />
+        
+        <Text style={{ marginBottom: 5 }}>Email:</Text>
+        <TextInput 
+          style={{ borderWidth: 1, height: 40, paddingHorizontal: 10, marginBottom: 15 }} 
+          placeholder="test@gmail.com" 
+          keyboardType="email-address"
+          onChangeText={setEmail} 
+        />
+        
+        <Text style={{ marginBottom: 5 }}>Mật khẩu:</Text>
+        <TextInput 
+          secureTextEntry 
+          style={{ borderWidth: 1, height: 40, paddingHorizontal: 10, marginBottom: 15 }} 
+          placeholder="********" 
+          onChangeText={setPassword} 
+        />
+        
+        <Text style={{ marginBottom: 5 }}>Nhập lại mật khẩu:</Text>
+        <TextInput 
+          secureTextEntry 
+          style={{ borderWidth: 1, height: 40, paddingHorizontal: 10, marginBottom: 20 }} 
+          placeholder="********" 
+          onChangeText={setConfirm} 
+        />
 
-      <Text style={{
-        textAlign: 'center',
-        fontSize: 26,
-        fontWeight: 'bold'
-      }}>
-        Register
-      </Text>
+        <TouchableOpacity 
+          onPress={registerUser} 
+          style={{ backgroundColor: '#007bff', height: 45, justifyContent: 'center', alignItems: 'center' }}
+        >
+          <Text style={{ color: 'white', fontSize: 16, fontWeight: 'bold' }}>TẠO TÀI KHOẢN</Text>
+        </TouchableOpacity>
 
-      <View>
-        <Text style={{ marginBottom: 4 }}>
-          Name
-        </Text>
-        <TextInput style={{placeholder:'test', borderWidth: 1, height: 40 }} />
+        <TouchableOpacity onPress={onNavigateToLogin} style={{ marginTop: 20 }}>
+          <Text style={{ textAlign: 'center', color: '#007bff' }}>Bạn đã có tài khoản? Đăng nhập</Text>
+        </TouchableOpacity>
       </View>
-
-      <View>
-        <Text style={{ marginBottom: 4 }}>
-          Email
-        </Text>
-        <TextInput style={{placeholder:'test@gmail.com', borderWidth: 1, height: 40 }} />
-      </View>
-
-      <View>
-        <Text style={{ marginBottom: 4 }}>
-          Password
-        </Text>
-        <TextInput secureTextEntry style={{placeholder:'********', borderWidth: 1, height: 40 }} />
-      </View>
-
-      <View>
-        <Text style={{ marginBottom: 4 }}>
-          Confirm Password
-        </Text>
-        <TextInput secureTextEntry style={{placeholder:'********', borderWidth: 1, height: 40 }} />
-      </View>
-
-      <TouchableOpacity style={{
-        backgroundColor: '#007bff',
-        height: 40,
-        justifyContent: 'center',
-        alignItems: 'center'
-      }}>
-        <Text style={{
-          color: 'white',
-          fontSize: 16,
-          fontWeight: 'bold'
-        }}>
-          Create
-        </Text>
-      </TouchableOpacity>
-
     </View>
   );
 }
