@@ -1,15 +1,60 @@
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-
-const DATA = [
-  { id: '1', title: 'Học về React Native', sub: 'Một framework rất hay để làm app di động.' },
-  { id: '2', title: 'Tại sao nên dùng Expo?', sub: 'Giúp mọi thứ trở nên nhanh chóng và tiện lợi.' },
-  { id: '3', title: 'Chia sẻ kiến thức', sub: 'Hãy cùng nhau học tập mỗi ngày nhé.' },
-  { id: '4', title: 'Kinh nghiệm code', sub: 'Luôn giữ mọi thứ đơn giản nhất có thể.' },
-  { id: '5', title: 'Dự án đầu tay', sub: 'Đây là app đầu tiên tôi đang hoàn thiện.' },
-];
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Modal, TextInput, Button, Alert } from 'react-native';
+import { getPosts, addPost, deletePost } from './database';
 
 export default function Home({ user, onNavigateToProfile }) {
+  const [posts, setPosts] = useState([]);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newTitle, setNewTitle] = useState('');
+  const [newSub, setNewSub] = useState('');
+
+  useEffect(() => {
+    loadPosts();
+  }, []);
+
+  const loadPosts = async () => {
+    try {
+      const data = await getPosts();
+      setPosts(data);
+    } catch (error) {
+      console.error('Failed to load posts:', error);
+    }
+  };
+
+  const handleAddPost = async () => {
+    if (!newTitle || !newSub) {
+      Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ thông tin');
+      return;
+    }
+    try {
+      await addPost(newTitle, newSub);
+      setNewTitle('');
+      setNewSub('');
+      setModalVisible(false);
+      loadPosts();
+    } catch (error) {
+      Alert.alert('Lỗi', 'Không thể thêm bài đăng');
+    }
+  };
+
+  const handleDeletePost = async (id) => {
+    Alert.alert('Xóa bài đăng', 'Bạn có chắc chắn muốn xóa bài đăng này?', [
+      { text: 'Hủy', style: 'cancel' },
+      { 
+        text: 'Xóa', 
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await deletePost(id);
+            loadPosts();
+          } catch (error) {
+            Alert.alert('Lỗi', 'Không thể xóa bài đăng');
+          }
+        }
+      }
+    ]);
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: 'white', paddingTop: 50 }}>
       {/* Header */}
@@ -25,29 +70,60 @@ export default function Home({ user, onNavigateToProfile }) {
       </View>
 
       <View style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontSize: 20, fontWeight: '600' }}>Bài đăng của bạn (5)</Text>
-        <TouchableOpacity style={{ borderWidth: 1, padding: 5, paddingHorizontal: 15 }}>
+        <Text style={{ fontSize: 20, fontWeight: '600' }}>Bài đăng của bạn ({posts.length})</Text>
+        <TouchableOpacity 
+          onPress={() => setModalVisible(true)}
+          style={{ borderWidth: 1, padding: 5, paddingHorizontal: 15 }}
+        >
           <Text>+ Thêm</Text>
         </TouchableOpacity>
       </View>
 
-      {/* FlatList sẽ tự động scroll nếu nội dung dài hơn màn hình */}
+      {/* List */}
       <FlatList
-        data={DATA}
-        keyExtractor={item => item.id}
-        style={{ flex: 1 }} // Đảm bảo FlatList chiếm hết phần không gian còn lại
-        contentContainerStyle={{ paddingBottom: 30 }} // Thêm khoảng trống ở cuối để scroll thoải mái
+        data={posts}
+        keyExtractor={item => item.id.toString()}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 30 }}
         renderItem={({ item }) => (
           <View style={{ margin: 20, marginTop: 0, padding: 15, borderWidth: 1, borderColor: '#ddd' }}>
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
               <Text style={{ fontSize: 18, fontWeight: 'bold', flex: 1 }}>{item.title}</Text>
-              <Text style={{ color: '#ccc', fontSize: 20 }}>×</Text>
+              <TouchableOpacity onPress={() => handleDeletePost(item.id)}>
+                <Text style={{ color: '#ccc', fontSize: 20 }}>×</Text>
+              </TouchableOpacity>
             </View>
             <Text style={{ color: '#555', marginTop: 5 }}>{item.sub}</Text>
-            <Text style={{ color: '#999', fontSize: 12, marginTop: 10 }}>🕒 22/03/2026 10:00</Text>
+            <Text style={{ color: '#999', fontSize: 12, marginTop: 10 }}>🕒 {item.created_at}</Text>
           </View>
         )}
       />
+
+      {/* Add Modal */}
+      <Modal visible={modalVisible} animationType="slide" transparent={true}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <View style={{ width: '80%', backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 15 }}>Thêm bài đăng mới</Text>
+            <TextInput
+              placeholder="Tiêu đề"
+              style={{ borderWidth: 1, borderColor: '#ddd', padding: 10, marginBottom: 10 }}
+              value={newTitle}
+              onChangeText={setNewTitle}
+            />
+            <TextInput
+              placeholder="Nội dung"
+              style={{ borderWidth: 1, borderColor: '#ddd', padding: 10, marginBottom: 20 }}
+              value={newSub}
+              onChangeText={setNewSub}
+              multiline
+            />
+            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+              <Button title="Hủy" color="red" onPress={() => setModalVisible(false)} />
+              <Button title="Thêm" onPress={handleAddPost} />
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
