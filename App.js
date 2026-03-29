@@ -5,9 +5,12 @@ import Register from './register';
 import Login from './login';
 import Home from './home';
 import Profile from './profile';
+import Settings from './Settings';
+import BottomNavBar from './BottomNavBar';
 
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('login');
+  const [activeTab, setActiveTab] = useState('home');
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
@@ -19,6 +22,19 @@ export default function App() {
     if (data) setCurrentUser(data);
   };
 
+  const renderActiveTab = () => {
+    switch (activeTab) {
+      case 'home':
+        return <Home user={currentUser} onNavigateToProfile={() => setActiveTab('profile')} />;
+      case 'profile':
+        return <Profile user={currentUser} onBack={() => setActiveTab('home')} />;
+      case 'setting':
+        return <Settings />;
+      default:
+        return <Home user={currentUser} onNavigateToProfile={() => setActiveTab('profile')} />;
+    }
+  };
+
   const renderScreen = () => {
     switch (currentScreen) {
       case 'register':
@@ -26,14 +42,19 @@ export default function App() {
       case 'login':
         return <Login 
           onNavigateToRegister={() => navigateTo('register')} 
-          onLoginSuccess={(user) => navigateTo('home', user)} 
+          onLoginSuccess={(user) => navigateTo('main', user)} 
         />;
-      case 'home':
-        return <Home user={currentUser} onNavigateToProfile={() => navigateTo('profile')} />;
-      case 'profile':
-        return <Profile user={currentUser} onBack={() => navigateTo('home')} />;
+      case 'main':
+        return (
+          <View style={{ flex: 1 }}>
+            <View style={{ flex: 1 }}>
+              {renderActiveTab()}
+            </View>
+            <BottomNavBar activeTab={activeTab} onTabPress={setActiveTab} />
+          </View>
+        );
       default:
-        return <Login onNavigateToRegister={() => navigateTo('register')} onLoginSuccess={(user) => navigateTo('home', user)} />;
+        return <Login onNavigateToRegister={() => navigateTo('register')} onLoginSuccess={(user) => navigateTo('main', user)} />;
     }
   };
 

@@ -52,9 +52,6 @@ export default function Profile({ user, onBack }) {
           <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Save</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onBack} style={{ marginTop: 20 }}>
-          <Text style={{ color: '#007bff' }}>Trở về Home</Text>
-        </TouchableOpacity>
       </View>
     </ScrollView>
   );

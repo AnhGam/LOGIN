@@ -63,10 +63,10 @@ export default function Home({ user, onNavigateToProfile }) {
           <Text style={{ fontSize: 16 }}>Hello,</Text>
           <Text style={{ fontSize: 26, fontWeight: 'bold' }}>{user?.name || 'Bạn'} 👋</Text>
         </View>
-        <TouchableOpacity
-          onPress={onNavigateToProfile}
-          style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#eee', borderWidth: 1 }}
-        />
+        {/* Profile Avatar (Static) */}
+        <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: '#eee', borderWidth: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ fontSize: 20 }}>👤</Text>
+        </View>
       </View>
 
       <View style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
