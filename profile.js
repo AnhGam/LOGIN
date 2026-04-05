@@ -1,57 +1,98 @@
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator, Alert } from 'react-native';
+import { getProfile } from './api';
 
 export default function Profile({ user, onBack }) {
+  const [profileData, setProfileData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.email) {
+      fetchProfile();
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const data = await getProfile(user.email);
+      setProfileData(data);
+    } catch (error) {
+      console.error('Failed to fetch profile:', error);
+      Alert.alert('Lỗi', 'Không thể tải thông tin cá nhân');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#007bff" />
+      </View>
+    );
+  }
+
+  const displayName = profileData?.name || user?.name || 'User';
+
   return (
     <ScrollView style={{ flex: 1, backgroundColor: 'white', paddingTop: 50 }}>
       {/* Top Header */}
       <View style={{ padding: 20, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Text style={{ fontSize: 32, fontWeight: 'bold' }}>{user?.name || 'Huy'}!</Text>
-        <View style={{ width: 60, height: 60, borderWidth: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <View style={{ flex: 1, marginRight: 20 }}>
+          <Text style={{ fontSize: 32, fontWeight: 'bold' }}>{displayName}!</Text>
+        </View>
+        <View style={{ width: 60, height: 60, borderWidth: 1, justifyContent: 'center', alignItems: 'center', borderRadius: 30, backgroundColor: '#eee' }}>
           <Text style={{ fontSize: 30 }}>🖼️</Text>
         </View>
       </View>
 
       {/* Form nhập liệu */}
-      <View style={{ padding: 20 }}>
-        <Text style={{ fontSize: 16 }}>Name</Text>
-        <TextInput 
-          style={{ borderWidth: 1, height: 45, padding: 10, marginTop: 5 }} 
-          value={user?.name || 'Huy'} 
-        />
+      <View style={{ padding: 20, paddingBottom: 50 }}>
+        <View style={{ marginBottom: 20 }}>
+          <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#475569', marginBottom: 8 }}>Họ và tên</Text>
+          <TextInput 
+            style={{ borderWidth: 1.5, borderColor: '#e2e8f0', height: 48, paddingHorizontal: 15, borderRadius: 12, backgroundColor: '#fff', fontSize: 16, color: '#1e293b' }} 
+            value={displayName} 
+          />
+        </View>
 
-        <Text style={{ fontSize: 16, marginTop: 15 }}>Email</Text>
-        <TextInput 
-          style={{ borderWidth: 1, height: 45, padding: 10, marginTop: 5, backgroundColor: '#eee' }} 
-          editable={false}
-          value={user?.email || 'test@gmail.com'} 
-        />
+        <View style={{ marginBottom: 20 }}>
+          <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#475569', marginBottom: 8 }}>Email kết nối</Text>
+          <TextInput 
+            style={{ borderWidth: 1.5, borderColor: '#f1f5f9', height: 48, paddingHorizontal: 15, borderRadius: 12, backgroundColor: '#f8fafc', fontSize: 16, color: '#64748b' }} 
+            editable={false}
+            value={profileData?.email || user?.email} 
+          />
+        </View>
 
-        <Text style={{ fontSize: 16, marginTop: 15 }}>Address</Text>
-        <TextInput 
-          style={{ borderWidth: 1, height: 45, padding: 10, marginTop: 5 }} 
-          placeholder="Your Address" 
-        />
+        <View style={{ marginBottom: 20 }}>
+          <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#475569', marginBottom: 8 }}>Địa chỉ</Text>
+          <TextInput 
+            style={{ borderWidth: 1.5, borderColor: '#e2e8f0', height: 48, paddingHorizontal: 15, borderRadius: 12, backgroundColor: '#fff', fontSize: 16, color: '#1e293b' }} 
+            placeholder="Nhập địa chỉ của bạn" 
+            placeholderTextColor="#94a3b8"
+            value={profileData?.address || ''}
+          />
+        </View>
 
-        <Text style={{ fontSize: 16, marginTop: 15 }}>Avatar URL</Text>
-        <TextInput 
-          style={{ borderWidth: 1, height: 45, padding: 10, marginTop: 5 }} 
-          placeholder="https://example.com/photo.jpg" 
-        />
-
-        <Text style={{ fontSize: 16, marginTop: 15 }}>Description</Text>
-        <TextInput 
-          style={{ borderWidth: 1, height: 100, padding: 10, marginTop: 5, textAlignVertical: 'top' }} 
-          multiline
-          placeholder="Tell us about yourself..." 
-        />
+        <View style={{ marginBottom: 25 }}>
+          <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#475569', marginBottom: 8 }}>Giới thiệu bản thân</Text>
+          <TextInput 
+            style={{ borderWidth: 1.5, borderColor: '#e2e8f0', height: 120, padding: 15, borderRadius: 12, backgroundColor: '#fff', fontSize: 16, color: '#1e293b', textAlignVertical: 'top' }} 
+            multiline
+            placeholder="Hãy chia sẻ một chút về bạn..." 
+            placeholderTextColor="#94a3b8"
+            value={profileData?.description || ''}
+          />
+        </View>
 
         <TouchableOpacity 
-          style={{ borderWidth: 1, width: 150, height: 50, marginTop: 30, justifyContent: 'center', alignItems: 'center' }}
+          onPress={onBack}
+          style={{ backgroundColor: '#60a5fa', height: 52, borderRadius: 12, justifyContent: 'center', alignItems: 'center', elevation: 2, shadowColor: '#60a5fa', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 8 }}
         >
-          <Text style={{ fontSize: 18, fontWeight: 'bold' }}>Save</Text>
+          <Text style={{ fontSize: 18, fontWeight: 'bold', color: 'white' }}>Hoàn tất</Text>
         </TouchableOpacity>
-
       </View>
     </ScrollView>
   );

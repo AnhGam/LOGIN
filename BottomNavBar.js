@@ -11,25 +11,30 @@ export default function BottomNavBar({ activeTab, onTabPress }) {
 
   return (
     <View style={styles.container}>
-      {tabs.map((tab) => {
-        const isActive = activeTab === tab.id;
-        return (
-          <TouchableOpacity
-            key={tab.id}
-            style={styles.tabItem}
-            onPress={() => onTabPress(tab.id)}
-          >
-            <Ionicons
-              name={isActive ? tab.activeIcon : tab.icon}
-              size={24}
-              color={isActive ? '#3b82f6' : '#8e8e93'}
-            />
-            <Text style={[styles.label, { color: isActive ? '#3b82f6' : '#8e8e93' }]}>
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
+        {tabs.map((tab) => {
+          const isActive = activeTab === tab.id;
+          return (
+            <TouchableOpacity
+              key={tab.id}
+              style={styles.tabItem}
+              onPress={() => onTabPress(tab.id)}
+            >
+              <View style={[
+                  { alignItems: 'center', justifyContent: 'center', paddingVertical: 8, paddingHorizontal: 25 },
+                  isActive && { backgroundColor: '#eff6ff', borderRadius: 12 }
+              ]}>
+                <Ionicons
+                    name={isActive ? tab.activeIcon : tab.icon}
+                    size={24}
+                    color={isActive ? '#60a5fa' : '#94a3b8'}
+                />
+                <Text style={[styles.label, { color: isActive ? '#60a5fa' : '#94a3b8', fontWeight: isActive ? '600' : '400', marginTop: 2 }]}>
+                    {tab.label}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          );
+        })}
     </View>
   );
 }

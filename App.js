@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View } from 'react-native';
-import { initDatabase } from './database';
 import Register from './register';
 import Login from './login';
 import Home from './home';
@@ -12,10 +11,6 @@ export default function App() {
   const [currentScreen, setCurrentScreen] = useState('login');
   const [activeTab, setActiveTab] = useState('home');
   const [currentUser, setCurrentUser] = useState(null);
-
-  useEffect(() => {
-    initDatabase().catch(err => console.error('Error initializing database:', err));
-  }, []);
 
   const navigateTo = (screen, data = null) => {
     setCurrentScreen(screen);
